@@ -65,7 +65,7 @@ app.post("/api/tutor/:problemId" ,async(req,res)=>{
 
     let chat=await Conversation.findOne({
       learnerld,
-      problemld
+      problemId
     });
 
     if(!chat){

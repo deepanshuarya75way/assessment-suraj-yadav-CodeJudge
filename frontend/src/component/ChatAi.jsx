@@ -2,10 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import axiosClient from "../utils/axiosClient";
 import { Send } from 'lucide-react';
-
-function ChatAi({problem}) {
-    const [messages, setMessages] = useState([
-        { 
+const defaultMessages = [
+    { 
          role: 'model', 
          parts:[
             {text:"Hi, How are you"}
@@ -17,12 +15,23 @@ function ChatAi({problem}) {
             {text:"I am Good"}
          ] 
         }
-    ]);
+]
+
+function ChatAi({problem}){
+    const chatKey = `ai-chat-${problem._id || problem.id}`;
+    const [message , setMessages] = useState(()=>{
+        const savedMessages = localStorage.getItem(chatKey);
+        return savedMessages ? JSON.parse(savedMessages) : defaultMessages;}
+    );
+
 
     const { register, handleSubmit, reset,formState: {errors} } = useForm();
     const messagesEndRef = useRef(null);
+    useEffect(()=>{
+        localStorage.setItem(chatKey, JSON.stringify(messages));
+    },[chatkey,messages])
 
-    useEffect(() => {
+    useEffect(() => { 
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
