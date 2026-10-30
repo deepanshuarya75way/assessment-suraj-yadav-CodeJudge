@@ -9,13 +9,15 @@ const problemRouter = require('../routes/problemCreator')
 const submitRouter = require('../routes/submit');
 const aiRouter = require('../routes/GemniAi');
 const cors = require("cors");
+const Conversation = require("../model/conversation")
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "https://frontend-peach-ten-81.vercel.app",
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
   credentials: true
 }));
 const videoRouter = require('../routes/videoCreator');
 const { initJudgeWorker } = require('../utils/judgeWorker');
+const { json } = require('stream/consumers');
 
 app.use(express.json());
 app.use(cookieParser());
@@ -53,6 +55,64 @@ client.connect()
     initJudgeWorker();
   })
   .catch(err => console.error("Redis Connection Error:", err.message));
+
+
+
+app.post("/api/tutor/:problemId" ,async(req,res)=>{
+  try{
+    const{problemId} = req.params;
+    const{learnerld,message}=req.body;
+
+    let chat=await Conversation.findOne({
+      learnerld,
+      problemld
+    });
+
+    if(!chat){
+      chat=new Conversation({
+        learnerld,
+        problemId,
+        messages:[]
+      });
+    }
+     chat.messages.push({
+      roel:"user",
+      content:message
+     });
+     const answer=await
+     getAIResponse(chat.messages);
+
+     chat.messages.push({
+      role:"assistant",
+      content:answer
+     });
+     await chat.save();
+     res.json({
+      answer,
+      mesages:chat.messages
+     });
+
+  } catch(error){
+    console.error("Tutor error");
+
+    res.status(500).json({
+      message:"Something went error"
+    });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ⚡ KEEP-ALIVE: Prevent free-tier hosting (Render/Railway) from sleeping.
 // Free tier spins down after ~15 min of inactivity. This self-ping every 13 min
