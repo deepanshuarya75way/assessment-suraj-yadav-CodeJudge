@@ -15,11 +15,11 @@ const defaultMessages = [
             {text:"I am Good"}
          ] 
         }
-]
+];
 
 function ChatAi({problem}){
     const chatKey = `ai-chat-${problem._id || problem.id}`;
-    const [message , setMessages] = useState(()=>{
+    const [messages , setMessages] = useState(()=>{
         const savedMessages = localStorage.getItem(chatKey);
         return savedMessages ? JSON.parse(savedMessages) : defaultMessages;}
     );
@@ -29,7 +29,7 @@ function ChatAi({problem}){
     const messagesEndRef = useRef(null);
     useEffect(()=>{
         localStorage.setItem(chatKey, JSON.stringify(messages));
-    },[chatkey,messages])
+    },[chatKey,messages])
 
     useEffect(() => { 
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
